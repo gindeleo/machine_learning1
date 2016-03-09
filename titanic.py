@@ -18,21 +18,21 @@ train = pd.read_csv('train.csv')
 
 # Plots
 #plot to get an idea of age data and whether median is a reasonable pick for replacing missing data
-plt.title("median = " + str(test["Age"].median()) + " mean = " + str(test["Age"].mean()))
-plt.xlabel('Age')
-plt.ylabel('frequency')
-test["Age"].plot(kind="hist", bins=16)
-plt.show()
+# plt.title("median = " + str(test["Age"].median()) + " mean = " + str(test["Age"].mean()))
+# plt.xlabel('Age')
+# plt.ylabel('frequency')
+# test["Age"].plot(kind="hist", bins=16)
+# plt.show()
 
 test["Age"] = test["Age"].fillna(test["Age"].median()) #fill missing values with median value
 train["Age"] = train["Age"].fillna(train["Age"].median())
 
 #plot for agae data after clean up
-plt.title("median = " + str(test["Age"].median()) + " mean = " + str(test["Age"].mean()))
-plt.xlabel('Age')
-plt.ylabel('frequency')
-test["Age"].plot(kind="hist", bins=16)
-plt.show()
+# plt.title("median = " + str(test["Age"].median()) + " mean = " + str(test["Age"].mean()))
+# plt.xlabel('Age')
+# plt.ylabel('frequency')
+# test["Age"].plot(kind="hist", bins=16)
+# plt.show()
 
 #print out info on train set
 print train.head(10)
@@ -56,4 +56,7 @@ test.loc[test["Embarked"] == "Q", "Embarked"] = 2
 train.loc[train["Embarked"] == "S", "Embarked"] = 0
 train.loc[train["Embarked"] == "C", "Embarked"] = 1
 train.loc[train["Embarked"] == "Q", "Embarked"] = 2
+
+
+
 
