@@ -12,12 +12,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from sklearn.ensemble import RandomForestClassifier 
+
 import argparse
-import sys,os
+import sys,os,csv
 
 #Parse command line arguments
 parser = argparse.ArgumentParser(description='Predict survivors of Titanic using machine learning')
-parser.add_argument('--method', '-m', type=str,  help="Select machine learning method (linear, forest) (default=linear)", default='linear', dest="ML_Method_input") 
+parser.add_argument('--method', '-m', type=str,  help="Select machine learning method (linear, forest) (default=linear)", default='linear', dest="ml_method_input") 
 args = parser.parse_args()
 
 #read data from csv files
@@ -65,21 +67,75 @@ train.loc[train["Embarked"] == "S", "Embarked"] = 0
 train.loc[train["Embarked"] == "C", "Embarked"] = 1
 train.loc[train["Embarked"] == "Q", "Embarked"] = 2
 
+#drop unused columns
+test = test.drop(['Cabin','Name','Ticket'], axis=1)
+train = train.drop(['Cabin','Name','Ticket'], axis=1)
 
+test["Fare"].fillna(test["Fare"].median(), inplace=True)
 
-#Do prediction
 
 #select method from command line arguments
-ML_Methods= {"Linear": "linear", "linear": "linear", "Forest": "forest", "forest": "forest"}
-if args.ML_Method_input in ML_Methods:
-	ML_Method=ML_Methods[args.ML_Method_input]
-	print "\nMachine learning method: " , ML_Method ,'\n'
+ml_methods= {"Linear": "linear", "linear": "linear", "Forest": "forest", "forest": "forest"}
+if args.ml_method_input in ml_methods:
+	ml_method=ml_methods[args.ml_method_input]
+	print "\nMachine learning method: " , ml_method ,'\n'
 else:
-	print "\n" "'" ,args.ML_Method_input, "'","is not a known method. Choose linear or forest"
+	print "\n" "'" ,args.ml_method_input, "'","is not a known method. Choose linear or forest"
 	sys.exit()
 
 
+#Define prediction methods
+
 #Random Forest machine learning
+def MlForest(train, test):
+	""" Random Forest tree ensemble method """
+
+	train_data=train.values
+	test_data=test.values
+	train_data.astype(float); test_data.astype(float)
+
+	np.set_printoptions(threshold=np.nan)
+	
+	forest = RandomForestClassifier(n_estimators =200,criterion='entropy')
+	forest.fit(train_data[:,[0,2,3,4,5,6,7,8]], train_data[:,1].astype(float)) #select all input
+	result=forest.predict(test_data[:,[0,1,2,3,4,5,6,7]])
+
+	return result
+
+
+def ValidateResult(result,compare_list):
+	"""Compare results to results from Kaggle (genderclass.csv)"""
+	compare_df=pd.read_csv(compare_list)
+
+	accuracy=sum(result==compare_df["Survived"].values)/np.float(np.size(result))
+	
+	return accuracy
+
+#predict
+"Predicting...\n"	
+if ml_method == "forest":
+	try:
+		result = MlForest(train, test)
+		print ml_method, "finished"
+
+	except:
+		print "Error in prediction: \n"
+		raise; sys.exit()
+
+
+#elif ML_Method == "linear":
+
+
+predictions_file = open("predicted.csv", "wb")
+open_file_object = csv.writer(predictions_file)
+open_file_object.writerow(["PassengerId","Survived"])
+open_file_object.writerows(zip(test["PassengerId"], result))
+predictions_file.close()
+
+#validate results
+accuracy= ValidateResult(result,'genderclassmodel.csv')
+
+print "\nOverlap with reference set from Kaggle: ", accuracy
 
 
 
