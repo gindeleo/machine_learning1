@@ -12,6 +12,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import argparse
+import sys,os
+
+#Parse command line arguments
+parser = argparse.ArgumentParser(description='Predict survivors of Titanic using machine learning')
+parser.add_argument('--method', '-m', type=str,  help="Select machine learning method (linear, forest) (default=linear)", default='linear', dest="ML_Method_input") 
+args = parser.parse_args()
+
 #read data from csv files
 test = pd.read_csv('test.csv')
 train = pd.read_csv('train.csv')
@@ -56,6 +64,25 @@ test.loc[test["Embarked"] == "Q", "Embarked"] = 2
 train.loc[train["Embarked"] == "S", "Embarked"] = 0
 train.loc[train["Embarked"] == "C", "Embarked"] = 1
 train.loc[train["Embarked"] == "Q", "Embarked"] = 2
+
+
+
+#Do prediction
+
+#select method from command line arguments
+ML_Methods= {"Linear": "linear", "linear": "linear", "Forest": "forest", "forest": "forest"}
+if args.ML_Method_input in ML_Methods:
+	ML_Method=ML_Methods[args.ML_Method_input]
+	print "\nMachine learning method: " , ML_Method ,'\n'
+else:
+	print "\n" "'" ,args.ML_Method_input, "'","is not a known method. Choose linear or forest"
+	sys.exit()
+
+
+#Random Forest machine learning
+
+
+
 
 
 
