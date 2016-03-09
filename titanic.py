@@ -13,9 +13,29 @@ import pandas as pd
 
 
 #read data from csv files
-test_df = pd.read_csv('test.csv')
-train_df = pd.read_csv('train.csv')
+test = pd.read_csv('test.csv')
+train = pd.read_csv('train.csv')
 
-print test_df.head(10)
-print test_df.describe()
+#print out info on train set
+print train.head(10)
+print train.describe()
+
+#clean up data
+test["Age"] = test["Age"].fillna(test["Age"].median()) #fill missing values with median value
+train["Age"] = train["Age"].fillna(train["Age"].median())
+
+test["Embarked"]=test["Embarked"].fillna("S")
+train["Embarked"]=train["Embarked"].fillna("S")
+
+#make entries numerical for Sex and Embarked
+test.loc[test["Sex"] == "male", "Sex"] = 0 ; test.loc[test["Sex"] == "female", "Sex"] = 1
+train.loc[train["Sex"] == "male", "Sex"] = 0 ; train.loc[train["Sex"] == "female", "Sex"] = 1
+
+test.loc[test["Embarked"] == "S", "Embarked"] = 0
+test.loc[test["Embarked"] == "C", "Embarked"] = 1
+test.loc[test["Embarked"] == "Q", "Embarked"] = 2
+
+train.loc[train["Embarked"] == "S", "Embarked"] = 0
+train.loc[train["Embarked"] == "C", "Embarked"] = 1
+train.loc[train["Embarked"] == "Q", "Embarked"] = 2
 
