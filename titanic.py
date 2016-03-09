@@ -22,7 +22,7 @@ train = pd.read_csv('train.csv')
 
 #clean up data
 
-# Some plots to see if the median age is the correct value to pic
+# plot to get an idea of age data and whether median is a reasonable pick for replacing missing data
 # plt.title("median = " + str(test["Age"].median()) + " mean = " + str(test["Age"].mean()))
 # plt.xlabel('Age')
 # plt.ylabel('frequency')
@@ -32,6 +32,7 @@ train = pd.read_csv('train.csv')
 test["Age"] = test["Age"].fillna(test["Age"].median()) #fill missing values with median value
 train["Age"] = train["Age"].fillna(train["Age"].median())
 
+# plot for agae data after clean up
 # plt.title("median = " + str(test["Age"].median()) + " mean = " + str(test["Age"].mean()))
 # plt.xlabel('Age')
 # plt.ylabel('frequency')
