@@ -8,63 +8,21 @@
 #	In this challenge, we ask you to complete the analysis of what sorts of people were likely to survive.
 #	In particular, we ask you to apply the tools of machine learning to predict which passengers survived the tragedy.
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import LogisticRegression
-from sklearn.cross_validation import KFold
-import random as rnd
-from sklearn import cross_validation
-
-from sklearn.ensemble import RandomForestClassifier 
-
 import argparse
 import sys,os,csv
 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import random as rnd
 
-#Parse command line arguments
-parser = argparse.ArgumentParser(description='Predict survivors of Titanic using machine learning')
-parser.add_argument('--method', '-m', type=str,  help="Select machine learning method (linear, forest) (default=linear)", default='linear', dest="ml_method_input") 
-args = parser.parse_args()
+from sklearn import cross_validation
+from sklearn.ensemble import RandomForestClassifier 
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.cross_validation import KFold
 
-
-#read data from csv files
-test = pd.read_csv('test.csv')
-train = pd.read_csv('train.csv')
-
-#print out info on train set
-# print train.head(10)
-# print train.describe()
-
-
-#clean up data
-test["Age"] = test["Age"].fillna(test["Age"].median()) #fill missing values with median value
-train["Age"] = train["Age"].fillna(train["Age"].median())
-
-test["Embarked"]=test["Embarked"].fillna(1)
-train["Embarked"]=train["Embarked"].fillna(1)
-
-#make entries numerical for Sex and Embarked
-test.loc[test["Sex"] == "male", "Sex"] = 0 ; test.loc[test["Sex"] == "female", "Sex"] = 1
-train.loc[train["Sex"] == "male", "Sex"] = 0 ; train.loc[train["Sex"] == "female", "Sex"] = 1
-
-test.loc[test["Embarked"] == "S", "Embarked"] = 0
-test.loc[test["Embarked"] == "C", "Embarked"] = 1
-test.loc[test["Embarked"] == "Q", "Embarked"] = 2
-
-train.loc[train["Embarked"] == "S", "Embarked"] = 0
-train.loc[train["Embarked"] == "C", "Embarked"] = 1
-train.loc[train["Embarked"] == "Q", "Embarked"] = 2
-
-# Fare
-
-# only for test_df, since there is a missing "Fare" values
-test["Fare"].fillna(test["Fare"].median(), inplace=True)
-
-
-
-#Random Forest machine learning
+#Define methods
 def MlForest(train, test):
 	""" Random Forest tree ensemble method """
 
@@ -82,15 +40,6 @@ def MlForest(train, test):
 	result=forest.predict(test_data[:,[0,1,2,3,4,5,6,7]])
 
 	return result
-
-
-def ValidateResult(result,compare_list):
-	"""Compare results to results from Kaggle (genderclass.csv)"""
-	compare_df=pd.read_csv(compare_list)
-
-	accuracy=sum(result==compare_df["Survived"].values)/np.float(np.size(result))
-	
-	return accuracy
 
 
 def MlLinear(train, test):
@@ -160,6 +109,51 @@ def MlLinear(train, test):
 	return predictions
 
 
+def ValidateResult(result,compare_list):
+	"""Compare results to results from Kaggle (genderclass.csv)"""
+	compare_df=pd.read_csv(compare_list)
+
+	accuracy=sum(result==compare_df["Survived"].values)/np.float(np.size(result))
+	
+	return accuracy
+
+
+# ***** M A I N  *****
+
+#Parse command line arguments
+parser = argparse.ArgumentParser(description='Predict survivors of Titanic using machine learning')
+parser.add_argument('--method', '-m', type=str,  help="Select machine learning method (linear, forest) (default=linear)", default='linear', dest="ml_method_input") 
+args = parser.parse_args()
+
+
+#read data from csv files
+test = pd.read_csv('test.csv')
+train = pd.read_csv('train.csv')
+
+
+#clean up data
+test["Age"] = test["Age"].fillna(test["Age"].median()) #fill missing values with median value
+train["Age"] = train["Age"].fillna(train["Age"].median())
+
+test["Embarked"]=test["Embarked"].fillna(1)
+train["Embarked"]=train["Embarked"].fillna(1)
+
+#make entries numerical for Sex and Embarked
+test.loc[test["Sex"] == "male", "Sex"] = 0 ; test.loc[test["Sex"] == "female", "Sex"] = 1
+train.loc[train["Sex"] == "male", "Sex"] = 0 ; train.loc[train["Sex"] == "female", "Sex"] = 1
+
+test.loc[test["Embarked"] == "S", "Embarked"] = 0
+test.loc[test["Embarked"] == "C", "Embarked"] = 1
+test.loc[test["Embarked"] == "Q", "Embarked"] = 2
+
+train.loc[train["Embarked"] == "S", "Embarked"] = 0
+train.loc[train["Embarked"] == "C", "Embarked"] = 1
+train.loc[train["Embarked"] == "Q", "Embarked"] = 2
+
+# only for test_df, since there is a missing "Fare" values
+test["Fare"].fillna(test["Fare"].median(), inplace=True)
+
+
 #select method from command line arguments
 ml_methods= {"Linear": "linear", "linear": "linear", "Forest": "forest", "forest": "forest"}
 if args.ml_method_input in ml_methods:
@@ -169,7 +163,7 @@ else:
 	print "\n" "'" ,args.ml_method_input, "'","is not a known method. Choose linear or forest"
 	sys.exit()
 
-#predict
+#prediction depending on method.
 "Predicting...\n"	
 if ml_method == "forest":
 	try:
@@ -188,6 +182,7 @@ elif ml_method == "linear":
 	except:
 		print "Error in prediction: \n"
 		raise; sys.exit()
+
 
 predictions_file = open("predicted.csv", "wb")
 open_file_object = csv.writer(predictions_file)
