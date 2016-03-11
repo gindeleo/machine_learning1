@@ -26,17 +26,26 @@ from sklearn.cross_validation import KFold
 def MlForest(train, test):
 	""" Random Forest tree ensemble method """
 
+	#drop unused columns
 	test = test.drop(['Cabin','Name','Ticket'], axis=1)
 	train = train.drop(['Cabin','Name','Ticket'], axis=1)
 
+	#transform dataframe array to numpy array and convert to float
 	train_data=train.values
 	test_data=test.values
 	train_data.astype(float); test_data.astype(float)
 
-	np.set_printoptions(threshold=np.nan)
-	
+	#create random forest estimator
 	forest = RandomForestClassifier(n_estimators =400,criterion='entropy')
+
+	#perform crossvalidation on
+	scores = cross_validation.cross_val_score(forest, train_data[:,[0,2,3,4,5,6,7,8]], train_data[:,1].astype(float), cv=3)
+	#Take the mean of the scores (because we have one for each fold)
+	print("cross-validation of Random Forest for train set accuracy: " +str(scores.mean()))
+
+	#fit estimator
 	forest.fit(train_data[:,[0,2,3,4,5,6,7,8]], train_data[:,1].astype(float)) #select all input
+	#predict
 	result=forest.predict(test_data[:,[0,1,2,3,4,5,6,7]])
 
 	return result
@@ -98,7 +107,6 @@ def MlLinear(train, test):
 	scores = cross_validation.cross_val_score(alg, train[predictors], train["Survived"], cv=3)
 	# Take the mean of the scores (because we have one for each fold)
 	print("cross-validation of Logistic Regression for train set accuracy: " +str(scores.mean()))
-
 
 	# Train the algorithm using all the training data
 	alg.fit(train[predictors], train["Survived"])
